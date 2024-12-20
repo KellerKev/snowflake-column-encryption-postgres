@@ -508,7 +508,7 @@ select emp_id from snowflake_employee where firstname='oliver';
 
 select emp_id from snowflake_employee where firstname='christian';
 
--- We can also updat the employee and switch to deterministic encryption if we want
+-- We can also update the employee and switch to deterministic encryption if we want
 
 CREATE OR REPLACE FUNCTION snowflake_employee_update_aes_deterministic(emp_id text, updatestring text) 
 RETURNS table (response text) as
