@@ -1,0 +1,6 @@
+streamlit
+streamlit-aggrid
+pandas
+sqlalchemy
+psycopg2-binary
+python-dotenv
