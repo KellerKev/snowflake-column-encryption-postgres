@@ -1,3 +1,4 @@
+SET my.snowflake_connection_url = 'snowflake://SNOWFLAKE_USER:SNOWFLAKE_PASSWORD-OR-TOKEN-OR-KEY:postgres_role:postgres_encrypt_wh:SNOWFLAKE_ACCOUNT@postgresschema/postgresdb';
 select snowflake_employee_insert_aes('emp1001','kevin','malone','Smith Str. 6','34534','5455455' );
 select snowflake_employee_insert_aes('emp1002','mark','dorsay','Brazlian ave. 7','75434','78443555' );
 select snowflake_employee_insert_aes('emp1003','william','stone','Brazlian ave. 155','85434','999993555' );
