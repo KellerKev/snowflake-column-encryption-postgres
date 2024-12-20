@@ -1,7 +1,7 @@
 import streamlit as st
 from st_aggrid import AgGrid, GridOptionsBuilder, GridUpdateMode
 import pandas as pd
-from sqlalchemy import create_engine, text
+from sqlalchemy import create_engine, text, event
 import json
 import os
 from dotenv import load_dotenv
@@ -9,7 +9,9 @@ from dotenv import load_dotenv
 # --------------------------------------------------------------------------------
 # Load Environment Variables
 # --------------------------------------------------------------------------------
-load_dotenv()  # take environment variables from .env.
+load_dotenv()  # Load environment variables from .env file
+
+
 
 DB_HOST = os.getenv("DB_HOST","localhost")
 DB_PORT = os.getenv("DB_PORT", "5432")  # Default PostgreSQL port
@@ -17,16 +19,33 @@ DB_NAME = os.getenv("DB_NAME","snowflakedb")
 DB_USER = os.getenv("DB_USER","snow")
 DB_PASSWORD = os.getenv("DB_PASSWORD","snowflake1234")
 
+SNOWFLAKE_CONNECTION_URL = os.getenv("SNOWFLAKE_CONNECTION_URL",'snowflake://SNOWFLAKE_USER:SNOWFLAKE_PASS_OR_TOKEN_OR_KEY:postgres_role:postgres_encrypt_wh:SNOWFLAKE_ACCOUNT@postgresschema/postgresdb')
+
 # --------------------------------------------------------------------------------
-# Database Connection Setup
+# Database Connection Setup with SQLAlchemy Event Listener
 # --------------------------------------------------------------------------------
+
+# Create SQLAlchemy engine
 try:
     engine = create_engine(
         f"postgresql+psycopg2://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
     )
 except Exception as e:
-    st.error(f"Error connecting to the database: {e}")
+    st.error(f"Error creating the database engine: {e}")
     st.stop()
+
+# Define the SET command
+SET_SNOWFLAKE_CONNECTION_URL = f"SET my.snowflake_connection_url = '{SNOWFLAKE_CONNECTION_URL}';"
+
+# Event listener to execute the SET command upon each new connection
+@event.listens_for(engine, "connect")
+def set_postgres_environment_variables(dbapi_connection, connection_record):
+    try:
+        cursor = dbapi_connection.cursor()
+        cursor.execute(SET_SNOWFLAKE_CONNECTION_URL)
+        cursor.close()
+    except Exception as e:
+        st.error(f"Error setting PostgreSQL environment variable: {e}")
 
 # --------------------------------------------------------------------------------
 # Helper Functions for DB Operations
@@ -148,6 +167,7 @@ if not df.empty:
             if all([new_emp_id, new_firstname, new_lastname]):
                 insert_employee(new_emp_id, new_firstname, new_lastname, new_address, new_postalcode, new_phone)
                 st.success("✅ Employee inserted successfully.")
+                st.experimental_rerun()  # Refresh data
             else:
                 st.error("❌ **Employee ID**, **First Name**, and **Last Name** are required fields.")
 
@@ -231,4 +251,3 @@ else:
 # --------------------------------------------------------------------------------
 st.markdown("---")
 st.markdown("Developed with ❤️ using Streamlit and PostgreSQL.")
-
