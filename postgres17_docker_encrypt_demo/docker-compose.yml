@@ -1,0 +1,15 @@
+version: "3.9"
+services:
+  db:
+    image: kbkeller/postgres17-python3u:pydal
+    environment:
+      POSTGRES_USER: snow
+      POSTGRES_PASSWORD: snowflake1234
+      POSTGRES_DB: snowflakedb
+    volumes:
+      - data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+volumes:
+  data:
